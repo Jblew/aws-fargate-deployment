@@ -37,8 +37,15 @@
     "breadcrumbs.enabled": true,
     "diffEditor.ignoreTrimWhitespace": false,
     "typescript.updateImportsOnFileMove.enabled": "always",
+    "deno.enable": true,
+    "deno.lint": true,
+    "[typescript]": {
+      "editor.defaultFormatter": "denoland.vscode-deno"
+    }
   },
   "extensions": {
-    "recommendations": []
+    "recommendations": [
+      "denoland.vscode-deno"
+    ]
   }
 }
