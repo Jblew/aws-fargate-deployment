@@ -1,6 +1,6 @@
 import { res } from "./utils.ts";
 
-const apiRepository = res("EcrRepositoryApi", "AWS::ECR::Repository", {
+export const apiRepository = res("EcrRepositoryApi", "AWS::ECR::Repository", {
   RepositoryName: "aws-fargate-deployment-api",
   EmptyOnDelete: true,
   ImageTagMutability: "MUTABLE",
@@ -29,28 +29,5 @@ function publicPullPolicyStatement() {
       "ecr:GetDownloadUrlForLayer",
       "ecr:ListImages",
     ],
-  };
-}
-
-function codebuildPushPolicyStatement() {
-  return {
-    Sid: "AllowCodeBuildPush",
-    Effect: "Allow",
-    Principal: {
-      Service: "codebuild.amazonaws.com",
-    },
-    Action: [
-      "ecr:BatchCheckLayerAvailability",
-      "ecr:CompleteLayerUpload",
-      "ecr:GetAuthorizationToken",
-      "ecr:InitiateLayerUpload",
-      "ecr:PutImage",
-      "ecr:UploadLayerPart",
-    ],
-    Condition: {
-      ArnLike: {
-        "aws:SourceArn": { Ref: "" },
-      },
-    },
   };
 }

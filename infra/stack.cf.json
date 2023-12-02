@@ -106,6 +106,34 @@
                     "codebuild:BatchPutTestCases"
                   ],
                   "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "ecr:GetAuthorizationToken"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "ecr:GetAuthorizationToken",
+                    "ecr:BatchCheckLayerAvailability",
+                    "ecr:GetDownloadUrlForLayer",
+                    "ecr:BatchGetImage",
+                    "ecr:BatchCheckLayerAvailability",
+                    "ecr:CompleteLayerUpload",
+                    "ecr:GetAuthorizationToken",
+                    "ecr:InitiateLayerUpload",
+                    "ecr:PutImage",
+                    "ecr:UploadLayerPart"
+                  ],
+                  "Resource": {
+                    "Fn::GetAtt": [
+                      "EcrRepositoryApi",
+                      "Arn"
+                    ]
+                  }
                 }
               ]
             }
@@ -122,9 +150,22 @@
           "Location": "example-awsfargatedeployment-api-src/src.zip"
         },
         "Environment": {
-          "Type": "ARM_LAMBDA_CONTAINER",
-          "ComputeType": "BUILD_LAMBDA_1GB",
-          "Image": "aws/codebuild/amazonlinux-aarch64-lambda-standard:nodejs18"
+          "Type": "ARM_CONTAINER",
+          "ComputeType": "BUILD_GENERAL1_SMALL",
+          "Image": "aws/codebuild/amazonlinux2-aarch64-standard:2.0",
+          "PrivilegedMode": true,
+          "EnvironmentVariables": [
+            {
+              "Type": "PLAINTEXT",
+              "Name": "REPOSITORY_URI",
+              "Value": {
+                "Fn::GetAtt": [
+                  "EcrRepositoryApi",
+                  "RepositoryUri"
+                ]
+              }
+            }
+          ]
         },
         "ConcurrentBuildLimit": 1,
         "Artifacts": {

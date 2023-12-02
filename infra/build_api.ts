@@ -1,3 +1,4 @@
+import { apiRepository } from "./ecr.ts";
 import { mustEnv, res } from "./utils.ts";
 
 const BucketName = mustEnv("SRC_API_S3_BUCKET_NAME");
@@ -77,6 +78,34 @@ const CodeBuildServiceRole = res(
               ],
               Resource: "*",
             },
+            {
+              Effect: "Allow",
+              Action: [
+                "ecr:GetAuthorizationToken",
+              ],
+              Resource: "*",
+            },
+            {
+              Effect: "Allow",
+              Action: [
+                "ecr:GetAuthorizationToken",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:CompleteLayerUpload",
+                "ecr:GetAuthorizationToken",
+                "ecr:InitiateLayerUpload",
+                "ecr:PutImage",
+                "ecr:UploadLayerPart",
+              ],
+              Resource: {
+                "Fn::GetAtt": [
+                  apiRepository[0],
+                  "Arn",
+                ],
+              },
+            },
           ],
         },
       },
@@ -94,20 +123,31 @@ const CodeBuildProject = res(
       Location: `${BucketName}/src.zip`,
     },
     Environment: {
-      Type: "ARM_LAMBDA_CONTAINER",
-      ComputeType: "BUILD_LAMBDA_1GB",
-      // aarch64 = ARM
-      Image: "aws/codebuild/amazonlinux-aarch64-lambda-standard:nodejs18",
-      // Type: "ARM_CONTAINER", // Slower startup
-      // ComputeType: "BUILD_GENERAL1_SMALL",
-      // Image: "aws/codebuild/amazonlinux2-aarch64-standard:2.0" // EC2 and lambda use different images (https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-available.html)
+      //   Type: "ARM_LAMBDA_CONTAINER",
+      //   ComputeType: "BUILD_LAMBDA_1GB",
+      //   Image: "aws/codebuild/amazonlinux-aarch64-lambda-standard:nodejs18", // aarch64 = ARM
+      Type: "ARM_CONTAINER", // Slower startup
+      ComputeType: "BUILD_GENERAL1_SMALL",
+      Image: "aws/codebuild/amazonlinux2-aarch64-standard:2.0", // EC2 and lambda use different images (https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-available.html)
+      PrivilegedMode: true,
+      EnvironmentVariables: [
+        {
+          Type: "PLAINTEXT",
+          Name: "REPOSITORY_URI",
+          Value: {
+            "Fn::GetAtt": [
+              apiRepository[0],
+              "RepositoryUri",
+            ],
+          },
+        },
+      ],
     },
     ConcurrentBuildLimit: 1,
     Artifacts: {
       Type: "NO_ARTIFACTS",
     },
     ServiceRole: {
-      //   "Fn::GetAtt": ["BuildApiCodeBuildServiceRole", "Arn"],
       "Ref": CodeBuildServiceRole[0],
     },
   },
