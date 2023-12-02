@@ -1,1 +1,30 @@
-{}
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Example CodeBuild on ARM lambda + ECR + ECS + Fargate + ALB stack",
+  "Resources": {
+    "EcrRepositoryApi": {
+      "Type": "AWS::ECR::Repository",
+      "Properties": {
+        "RepositoryName": "api",
+        "EmptyOnDelete": true,
+        "ImageTagMutability": "MUTABLE",
+        "RepositoryPolicyText": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Sid": "AllowPublicPull",
+              "Effect": "Allow",
+              "Principal": "*",
+              "Action": [
+                "ecr:BatchGetImage",
+                "ecr:DescribeImages",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:ListImages"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}
