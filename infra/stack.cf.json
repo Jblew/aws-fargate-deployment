@@ -5,7 +5,7 @@
     "EcrRepositoryApi": {
       "Type": "AWS::ECR::Repository",
       "Properties": {
-        "RepositoryName": "api",
+        "RepositoryName": "aws-fargate-deployment-api",
         "EmptyOnDelete": true,
         "ImageTagMutability": "MUTABLE",
         "RepositoryPolicyText": {
@@ -23,6 +23,16 @@
               ]
             }
           ]
+        }
+      }
+    },
+    "BuildApiS3Bucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": "example-awsfargatedeployment-api-src",
+        "AccessControl": "Private",
+        "VersioningConfiguration": {
+          "Status": "Enabled"
         }
       }
     }

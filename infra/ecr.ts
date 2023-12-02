@@ -1,8 +1,7 @@
-import { codeBuildRef } from "./codebuild.ts";
 import { res } from "./utils.ts";
 
 const apiRepository = res("EcrRepositoryApi", "AWS::ECR::Repository", {
-  RepositoryName: "api",
+  RepositoryName: "aws-fargate-deployment-api",
   EmptyOnDelete: true,
   ImageTagMutability: "MUTABLE",
   RepositoryPolicyText: repositoryPolicy(publicPullPolicyStatement()),
@@ -50,7 +49,7 @@ function codebuildPushPolicyStatement() {
     ],
     Condition: {
       ArnLike: {
-        "aws:SourceArn": { Ref: codeBuildRef },
+        "aws:SourceArn": { Ref: "" },
       },
     },
   };

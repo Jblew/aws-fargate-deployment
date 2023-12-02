@@ -1,15 +1,16 @@
-export type Resource = [string, object];
+export type Resource<T> = [string, { Type: string; Properties: T }];
+export type AnyResource = Resource<object>;
 type AWSResourceType = `AWS::${string}`;
 
-export function res(
+export function res<T>(
   name: string,
   Type: AWSResourceType,
-  Properties: object,
-): Resource {
+  Properties: T,
+): Resource<T> {
   return [name, { Type, Properties }];
 }
 
-export function assertNoDuplicates(resources: Resource[]) {
+export function assertNoDuplicates<T>(resources: Resource<T>[]) {
   const names = resources.map(([name, _]) => name);
   const duplicates = names.filter((name, i) => names.indexOf(name) !== i);
   if (duplicates.length > 0) {
@@ -17,7 +18,7 @@ export function assertNoDuplicates(resources: Resource[]) {
   }
 }
 
-export function resourcesToStack(resources: Resource[]): object {
+export function resourcesToStack<T>(resources: Resource<T>[]): object {
   const stack: Record<string, object> = {};
   for (const [name, obj] of resources) {
     stack[name] = obj;
