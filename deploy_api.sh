@@ -12,6 +12,8 @@ if [ -z "${SRC_API_S3_BUCKET_NAME}" ]; then
     exit 1
 fi
 
+zip -j -r api/src.zip ./api
+
 aws s3 sync \
     --delete \
     ./api "s3://${SRC_API_S3_BUCKET_NAME}"

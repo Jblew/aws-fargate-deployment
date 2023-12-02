@@ -35,6 +35,105 @@
           "Status": "Enabled"
         }
       }
+    },
+    "BuildApiCodeBuildServiceRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": "BuildApiCodeBuildServiceRole",
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "codebuild.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "CodeBuildServiceRolePolicy",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": "arn:aws:logs:*:*:*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:GetObject",
+                    "s3:GetObjectVersion"
+                  ],
+                  "Resource": [
+                    "arn:aws:s3:::example-awsfargatedeployment-api-src/*"
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:ListBucket"
+                  ],
+                  "Resource": [
+                    "arn:aws:s3:::example-awsfargatedeployment-api-src"
+                  ]
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "s3:ListAllMyBuckets"
+                  ],
+                  "Resource": "*"
+                },
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "codebuild:CreateReportGroup",
+                    "codebuild:CreateReport",
+                    "codebuild:UpdateReport",
+                    "codebuild:BatchPutTestCases"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "BuildApiCodeBuildProject": {
+      "Type": "AWS::CodeBuild::Project",
+      "Properties": {
+        "Name": "BuildApiCodeBuildProject",
+        "Source": {
+          "Type": "S3",
+          "Location": "example-awsfargatedeployment-api-src/src.zip"
+        },
+        "Environment": {
+          "Type": "ARM_LAMBDA_CONTAINER",
+          "ComputeType": "BUILD_LAMBDA_1GB",
+          "Image": "aws/codebuild/amazonlinux-aarch64-lambda-standard:nodejs18"
+        },
+        "ConcurrentBuildLimit": 1,
+        "Artifacts": {
+          "Type": "NO_ARTIFACTS"
+        },
+        "ServiceRole": {
+          "Ref": "BuildApiCodeBuildServiceRole"
+        }
+      }
     }
   }
 }

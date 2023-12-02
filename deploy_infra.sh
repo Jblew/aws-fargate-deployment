@@ -11,4 +11,7 @@ export AWS_PAGER="" # AWS Cli sometimes uses a pager, which breaks the script. L
 aws cloudformation deploy \
     --stack-name "${AWS_CF_STACK_NAME}" \
     --template-file infra/stack.cf.json \
-    --region "${AWS_REGION}"
+    --region "${AWS_REGION}" \
+    --capabilities CAPABILITY_NAMED_IAM
+
+tput bel || echo "No bell"
