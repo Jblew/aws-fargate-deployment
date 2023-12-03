@@ -324,6 +324,10 @@
         },
         "DesiredCount": 1,
         "LaunchType": "FARGATE",
+        "DeploymentConfiguration": {
+          "MaximumPercent": 100,
+          "MinimumHealthyPercent": 0
+        },
         "NetworkConfiguration": {
           "AwsvpcConfiguration": {
             "AssignPublicIp": "ENABLED",
@@ -331,9 +335,37 @@
               "subnet-ec6a41a6",
               "subnet-de19d1b7",
               "subnet-13896268"
+            ],
+            "SecurityGroups": [
+              {
+                "Ref": "SecurityGroupApi"
+              }
             ]
           }
         }
+      }
+    },
+    "SecurityGroupApi": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Allow all outbound traffic",
+        "VpcId": "vpc-b477b0dd",
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 80,
+            "ToPort": 80,
+            "CidrIp": "0.0.0.0/0"
+          }
+        ],
+        "SecurityGroupEgress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": 0,
+            "ToPort": 65535,
+            "CidrIp": "0.0.0.0/0"
+          }
+        ]
       }
     }
   }

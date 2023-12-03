@@ -1,5 +1,5 @@
 import { apiRepository } from "./ecr.ts";
-import { defaultSubnetIDs } from "./subnets.ts";
+import { defaultSubnetIDs, defaultVPCID } from "./subnets.ts";
 import { FnGetAtt, FnJoin, Ref, res } from "./utils.ts";
 
 const cluster = res("EcsCluster", "AWS::ECS::Cluster", {
@@ -86,15 +86,41 @@ const apiTask = res("EcsTaskApi", "AWS::ECS::TaskDefinition", {
   ],
 });
 
+const securityGroup = res("SecurityGroupApi", "AWS::EC2::SecurityGroup", {
+  GroupDescription: "Allow all outbound traffic",
+  VpcId: defaultVPCID,
+  SecurityGroupIngress: [
+    {
+      IpProtocol: "tcp",
+      FromPort: 80,
+      ToPort: 80,
+      CidrIp: "0.0.0.0/0",
+    },
+  ],
+  SecurityGroupEgress: [
+    {
+      IpProtocol: "tcp",
+      FromPort: 0,
+      ToPort: 65535,
+      CidrIp: "0.0.0.0/0",
+    },
+  ],
+});
+
 const apiService = res("EcsServiceApi", "AWS::ECS::Service", {
   Cluster: Ref(cluster),
   TaskDefinition: Ref(apiTask),
   DesiredCount: 1,
   LaunchType: "FARGATE",
+  DeploymentConfiguration: {
+    MaximumPercent: 100,
+    MinimumHealthyPercent: 0,
+  },
   NetworkConfiguration: {
     AwsvpcConfiguration: {
       AssignPublicIp: "ENABLED",
       Subnets: defaultSubnetIDs,
+      SecurityGroups: [Ref(securityGroup)],
     },
   },
 });
@@ -105,4 +131,5 @@ export const ecsCluster = [
   apiTaskLogGroup,
   apiTask,
   apiService,
+  securityGroup,
 ];
