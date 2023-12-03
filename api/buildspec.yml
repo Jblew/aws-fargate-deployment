@@ -3,6 +3,7 @@ version: 0.2
 phases:
   pre_build:
     commands:
+      - uname -m
       - docker --version
       - aws --version
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $REPOSITORY_URI
@@ -11,7 +12,7 @@ phases:
 
   build:
     commands:
-      - docker build -t $REPOSITORY_URI:latest .
+      - docker build --platform linux/arm64 -t $REPOSITORY_URI:latest .
       - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:$IMAGE_TAG
 
   post_build:

@@ -1,10 +1,12 @@
 import { buildApi } from "./build_api.ts";
 import { ecr } from "./ecr.ts";
+import { ecsCluster } from "./ecs.ts";
 import { AnyResource, assertNoDuplicates, resourcesToStack } from "./utils.ts";
 
 const resources: AnyResource[] = [
   ...ecr,
   ...buildApi,
+  ...ecsCluster,
 ];
 assertNoDuplicates(resources);
 const stack = {

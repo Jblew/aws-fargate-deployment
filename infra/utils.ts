@@ -41,3 +41,7 @@ export function FnGetAtt(res: AnyResource, att: string) {
 export function Ref(res: AnyResource) {
   return { Ref: res[0] };
 }
+
+export function FnJoin(sep: string, ...parts: (string | object)[]) {
+  return { "Fn::Join": [sep, parts] };
+}
