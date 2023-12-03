@@ -342,8 +342,21 @@
               }
             ]
           }
-        }
-      }
+        },
+        "LoadBalancers": [
+          {
+            "TargetGroupArn": {
+              "Ref": "LBTargetGroup"
+            },
+            "ContainerName": "api",
+            "ContainerPort": 80
+          }
+        ]
+      },
+      "DependsOn": [
+        "LBTargetGroup",
+        "LBListener"
+      ]
     },
     "SecurityGroupApi": {
       "Type": "AWS::EC2::SecurityGroup",
@@ -366,6 +379,114 @@
             "CidrIp": "0.0.0.0/0"
           }
         ]
+      }
+    },
+    "LB": {
+      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "Properties": {
+        "Scheme": "internet-facing",
+        "Type": "application",
+        "Subnets": [
+          "subnet-ec6a41a6",
+          "subnet-de19d1b7",
+          "subnet-13896268"
+        ]
+      }
+    },
+    "LBTargetGroup": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties": {
+        "Port": 80,
+        "Protocol": "HTTP",
+        "TargetType": "ip",
+        "VpcId": "vpc-b477b0dd",
+        "TargetGroupAttributes": [
+          {
+            "Key": "deregistration_delay.timeout_seconds",
+            "Value": "5"
+          }
+        ]
+      }
+    },
+    "LBListener": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "DefaultActions": [
+          {
+            "Type": "forward",
+            "TargetGroupArn": {
+              "Ref": "LBTargetGroup"
+            }
+          }
+        ],
+        "LoadBalancerArn": {
+          "Ref": "LB"
+        },
+        "Port": 80,
+        "Protocol": "HTTP"
+      }
+    },
+    "MainDomainZone": {
+      "Type": "AWS::Route53::HostedZone",
+      "Properties": {
+        "Name": "fargateawsexample.jblew.pl."
+      }
+    },
+    "MainDomainRecord": {
+      "Type": "AWS::Route53::RecordSet",
+      "Properties": {
+        "Name": "fargateawsexample.jblew.pl.",
+        "Type": "A",
+        "AliasTarget": {
+          "DNSName": {
+            "Fn::GetAtt": [
+              "MainDomainCFDistro",
+              "DomainName"
+            ]
+          },
+          "HostedZoneId": {
+            "Fn::GetAtt": [
+              "MainDomainZone",
+              "Id"
+            ]
+          }
+        },
+        "HostedZoneId": {
+          "Fn::GetAtt": [
+            "MainDomainZone",
+            "Id"
+          ]
+        }
+      }
+    },
+    "MainDomainCFDistro": {
+      "Type": "AWS::CloudFront::Distribution",
+      "Properties": {
+        "DistributionConfig": {
+          "Enabled": true,
+          "DefaultRootObject": "index.html",
+          "PriceClass": "PriceClass_100",
+          "DefaultCacheBehavior": {
+            "CachePolicyId": "4135ea2d-6df8-44a3-9df3-4b5a84be39ad",
+            "TargetOriginId": "ALBOrigin",
+            "ViewerProtocolPolicy": "redirect-to-https"
+          },
+          "Origins": [
+            {
+              "Id": "ALBOrigin",
+              "DomainName": {
+                "Fn::GetAtt": [
+                  "LB",
+                  "DNSName"
+                ]
+              },
+              "CustomOriginConfig": {
+                "HTTPPort": 80,
+                "OriginProtocolPolicy": "http-only"
+              }
+            }
+          ]
+        }
       }
     }
   }

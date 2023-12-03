@@ -6,8 +6,9 @@ export function res<T>(
   name: string,
   Type: AWSResourceType,
   Properties: T,
+  others: { DependsOn?: string[] } = {},
 ): Resource<T> {
-  return [name, { Type, Properties }];
+  return [name, { Type, Properties, ...others }];
 }
 
 export function assertNoDuplicates<T>(resources: Resource<T>[]) {

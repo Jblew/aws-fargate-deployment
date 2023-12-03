@@ -1,3 +1,4 @@
+import { lbListener, targetGroup } from "./alb.ts";
 import { apiRepository } from "./ecr.ts";
 import { defaultSubnetIDs, defaultVPCID } from "./subnets.ts";
 import { FnGetAtt, FnJoin, Ref, res } from "./utils.ts";
@@ -61,6 +62,8 @@ const apiExecutionRole = res("IamRoleApiExecution", "AWS::IAM::Role", {
   ],
 });
 
+const publicContainerName = "api";
+
 const apiTask = res("EcsTaskApi", "AWS::ECS::TaskDefinition", {
   ExecutionRoleArn: Ref(apiExecutionRole),
   Cpu: "256",
@@ -71,7 +74,7 @@ const apiTask = res("EcsTaskApi", "AWS::ECS::TaskDefinition", {
   RuntimePlatform: { CpuArchitecture: "ARM64", OperatingSystemFamily: "LINUX" },
   ContainerDefinitions: [
     {
-      Name: "api",
+      Name: publicContainerName,
       Image: FnJoin(":", FnGetAtt(apiRepository, "RepositoryUri"), "latest"),
       PortMappings: [{ ContainerPort: 80, HostPort: 80 }],
       LogConfiguration: {
@@ -123,7 +126,14 @@ const apiService = res("EcsServiceApi", "AWS::ECS::Service", {
       SecurityGroups: [Ref(securityGroup)],
     },
   },
-});
+  LoadBalancers: [
+    {
+      TargetGroupArn: Ref(targetGroup),
+      ContainerName: publicContainerName,
+      ContainerPort: 80,
+    },
+  ],
+}, { DependsOn: [targetGroup[0], lbListener[0]] }); // Very important as Service will fail to create if LoadBalancerListener doesnt exist yet
 
 export const ecsCluster = [
   cluster,
