@@ -1,5 +1,5 @@
 import { apiRepository } from "./ecr.ts";
-import { mustEnv, res } from "./utils.ts";
+import { FnGetAtt, mustEnv, Ref, res } from "./utils.ts";
 
 const BucketName = mustEnv("SRC_API_S3_BUCKET_NAME");
 export const BuildApiS3Bucket = res("BuildApiS3Bucket", "AWS::S3::Bucket", {
@@ -99,12 +99,7 @@ const CodeBuildServiceRole = res(
                 "ecr:PutImage",
                 "ecr:UploadLayerPart",
               ],
-              Resource: {
-                "Fn::GetAtt": [
-                  apiRepository[0],
-                  "Arn",
-                ],
-              },
+              Resource: FnGetAtt(apiRepository, "Arn"),
             },
           ],
         },
@@ -134,22 +129,13 @@ const CodeBuildProject = res(
         {
           Type: "PLAINTEXT",
           Name: "REPOSITORY_URI",
-          Value: {
-            "Fn::GetAtt": [
-              apiRepository[0],
-              "RepositoryUri",
-            ],
-          },
+          Value: FnGetAtt(apiRepository, "RepositoryUri"),
         },
       ],
     },
     ConcurrentBuildLimit: 1,
-    Artifacts: {
-      Type: "NO_ARTIFACTS",
-    },
-    ServiceRole: {
-      "Ref": CodeBuildServiceRole[0],
-    },
+    Artifacts: { Type: "NO_ARTIFACTS" },
+    ServiceRole: Ref(CodeBuildServiceRole),
   },
 );
 

@@ -33,3 +33,11 @@ export function mustEnv(name: string) {
   }
   return value;
 }
+
+export function FnGetAtt(res: AnyResource, att: string) {
+  return { "Fn::GetAtt": [res[0], att] };
+}
+
+export function Ref(res: AnyResource) {
+  return { Ref: res[0] };
+}
