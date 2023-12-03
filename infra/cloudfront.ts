@@ -34,11 +34,12 @@ const cloudfrontDistribution = res(
 const r53RecordSet = res("MainDomainRecord", "AWS::Route53::RecordSet", {
   Name: `${domain}.`,
   Type: "A",
-  AliasTarget: {
-    DNSName: FnGetAtt(cloudfrontDistribution, "DomainName"),
-    HostedZoneId: FnGetAtt(r53Zone, "Id"),
-  },
   HostedZoneId: FnGetAtt(r53Zone, "Id"),
+  AliasTarget: {
+    HostedZoneId: "Z2FDTNDATAQYW2", // For CloudFront, always use Z2FDTNDATAQYW2, https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-route53-aliastarget.html
+    EvaluateTargetHealth: false,
+    DNSName: FnGetAtt(cloudfrontDistribution, "DomainName"),
+  },
 });
 
 export const cloudfront = [

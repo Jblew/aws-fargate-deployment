@@ -437,25 +437,21 @@
       "Properties": {
         "Name": "fargateawsexample.jblew.pl.",
         "Type": "A",
-        "AliasTarget": {
-          "DNSName": {
-            "Fn::GetAtt": [
-              "MainDomainCFDistro",
-              "DomainName"
-            ]
-          },
-          "HostedZoneId": {
-            "Fn::GetAtt": [
-              "MainDomainZone",
-              "Id"
-            ]
-          }
-        },
         "HostedZoneId": {
           "Fn::GetAtt": [
             "MainDomainZone",
             "Id"
           ]
+        },
+        "AliasTarget": {
+          "HostedZoneId": "Z2FDTNDATAQYW2",
+          "EvaluateTargetHealth": false,
+          "DNSName": {
+            "Fn::GetAtt": [
+              "MainDomainCFDistro",
+              "DomainName"
+            ]
+          }
         }
       }
     },
