@@ -1,0 +1,7 @@
+1. Run task wih ECS
+2. Send logs from containers to CloudWatch Logs
+3. Redeploy ECS task automatically on ECR Image push
+4. Configure CloudFormation GitSync to automatically update stack
+5. Cofigure CodeBuild to automatically build container sources
+6. Move `buildspec.yml` out of api folder
+7. Can I remove policy on ECR image?
